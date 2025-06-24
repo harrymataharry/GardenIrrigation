@@ -3,6 +3,8 @@
     "name": "BewaesserungHauptmodul",
     "type": 2,
     "vendor": "Harald Leopold",
+    "parentRequirements": [],
+    "implemented": [],
     "aliases": [ "Bewässerung Steuerung", "Irrigation Controller" ],
     "childRequirements": [ "{C2D4E5F6-A7B8-4C9D-0E1F-2A3B4C5D6E7F}" ],
     "prefix": "BEW"
