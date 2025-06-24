@@ -18,14 +18,16 @@ class BewaesserungFlaechenmodul extends IPSModule
         $this->EnableAction('Active');
         $this->RegisterVariableString('Status', 'Status', '', 2);
 
-        // --- KORREKTUR: Eigenes Profil für den Wasserverbrauch in Litern erstellen, falls es nicht existiert ---
-        if (!IPS_VariableProfileExists('~Water_Litre')) {
-            IPS_CreateVariableProfile('~Water_Litre', 2); // Typ 2 = Float
-            IPS_SetVariableProfileText('~Water_Litre', '', ' L');
-            IPS_SetVariableProfileDigits('~Water_Litre', 2);
-            IPS_SetVariableProfileIcon('~Water_Litre', 'Water');
+        // --- KORREKTUR: Eigenes Profil ohne Sonderzeichen im Namen erstellen ---
+        $profileName = 'BEW.Water.Litre'; // Neuer, gültiger Profilname
+        if (!IPS_VariableProfileExists($profileName)) {
+            IPS_CreateVariableProfile($profileName, 2); // Typ 2 = Float
+            IPS_SetVariableProfileText($profileName, '', ' L');
+            IPS_SetVariableProfileDigits($profileName, 2);
+            IPS_SetVariableProfileIcon($profileName, 'Water');
         }
-        $this->RegisterVariableFloat('LastConsumption', 'Letzter Verbrauch', '~Water_Litre', 3);
+        // Verwende das neue, saubere Profil
+        $this->RegisterVariableFloat('LastConsumption', 'Letzter Verbrauch', $profileName, 3);
     }
 
     public function ApplyChanges()
