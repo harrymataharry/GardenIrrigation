@@ -1,6 +1,6 @@
 {
     "id": "{B1C3D4E5-F6A7-4B8C-9D0E-1F2A3B4C5D6E}",
-    "name": "Bewässerung Hauptmodul",
+    "name": "BewaesserungHauptmodul",
     "type": 2,
     "vendor": "Harald Leopold",
     "aliases": [ "Bewässerung Steuerung", "Irrigation Controller" ],
