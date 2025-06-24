@@ -17,6 +17,14 @@ class BewaesserungFlaechenmodul extends IPSModule
         $this->RegisterVariableBoolean('Active', 'Bewässerung', '~Switch', 1);
         $this->EnableAction('Active');
         $this->RegisterVariableString('Status', 'Status', '', 2);
+
+        // --- KORREKTUR: Eigenes Profil für den Wasserverbrauch in Litern erstellen, falls es nicht existiert ---
+        if (!IPS_VariableProfileExists('~Water_Litre')) {
+            IPS_CreateVariableProfile('~Water_Litre', 2); // Typ 2 = Float
+            IPS_SetVariableProfileText('~Water_Litre', '', ' L');
+            IPS_SetVariableProfileDigits('~Water_Litre', 2);
+            IPS_SetVariableProfileIcon('~Water_Litre', 'Water');
+        }
         $this->RegisterVariableFloat('LastConsumption', 'Letzter Verbrauch', '~Water_Litre', 3);
     }
 
@@ -25,7 +33,9 @@ class BewaesserungFlaechenmodul extends IPSModule
         parent::ApplyChanges();
         $this->SetStatus(102);
     }
-
+    
+    // ... der Rest der Datei (RequestAction, StartWatering etc.) bleibt unverändert ...
+    
     public function RequestAction($Ident, $Value)
     {
         if ($Ident == 'Active') {
@@ -89,7 +99,7 @@ class BewaesserungFlaechenmodul extends IPSModule
              $this->StopWatering("Fehler: Kein IO");
              return;
         }
-
+        
         $this->SetBuffer('State', 'watering');
         $this->SetBuffer('StartTime', time());
         $this->SetBuffer('StartWater', GetValue($ioID));
@@ -97,7 +107,7 @@ class BewaesserungFlaechenmodul extends IPSModule
         $this->SetTimerInterval('WateringTimer', 30000);
         $this->ProcessWatering();
     }
-
+    
     public function StopWatering(string $message)
     {
         $this->SendDebug('StopWatering', "Bewässerung wird gestoppt: $message", 0);
@@ -105,7 +115,7 @@ class BewaesserungFlaechenmodul extends IPSModule
 
         $ventilID = $this->ReadPropertyInteger('VentilID');
         if ($ventilID > 0) RequestAction($ventilID, false);
-
+        
         $parentID = $this->GetParentID();
         if($parentID > 0) {
             $ioID = @IPS_GetInstance($parentID)['ConnectionID'];
@@ -120,7 +130,7 @@ class BewaesserungFlaechenmodul extends IPSModule
         $this->SetValue('Active', false);
         $this->SetValue('Status', $message);
         $this->SetBuffer('State', 'idle');
-
+        
         if($this->GetStatus() != 201) {
             $this->SetStatus(102);
         }
@@ -129,13 +139,13 @@ class BewaesserungFlaechenmodul extends IPSModule
     public function ProcessWatering()
     {
         if ($this->GetBuffer('State') !== 'watering') return;
-
+        
         $parentID = $this->GetParentID();
         if ($parentID == 0) {
             $this->StopWatering('Fehler: Verbindung zum Hauptmodul verloren');
             return;
         }
-
+        
         $startTime = $this->GetBuffer('StartTime');
         $startWater = $this->GetBuffer('StartWater');
         $zielMenge = $this->ReadPropertyInteger('ZielWassermenge');
@@ -150,7 +160,7 @@ class BewaesserungFlaechenmodul extends IPSModule
 
         $aktuellerWater = GetValue($ioID);
         $verbrauch = $aktuellerWater - $startWater;
-
+        
         $this->SetValue('Status', "Verbrauch: " . round($verbrauch, 2) . " / $zielMenge L");
 
         if ($verbrauch >= $zielMenge) {
